@@ -8,6 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.annotation.IdRes
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.techyourchance.dagger2course.R
 import com.techyourchance.dagger2course.questions.Question
@@ -29,10 +31,9 @@ class QuestionDetailsViewMvc(
 
     val rootView: View = layoutInflater.inflate(R.layout.layout_question_details, parent, false)
 
-    //private val context: Context get() = rootView.context
+    private val context: Context get() = rootView.context
 
     private val listeners = HashSet<Listener>()
-
 
     init {
         txtQuestionBody = findViewById(R.id.txt_question_body)
@@ -49,6 +50,15 @@ class QuestionDetailsViewMvc(
         swipeRefresh = findViewById(R.id.swipeRefresh)
         swipeRefresh.isEnabled = false
 
+    }
+
+    fun bindQuestionBody(questionBody: String) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            txtQuestionBody.text = Html.fromHtml(questionBody, Html.FROM_HTML_MODE_LEGACY)
+        } else {
+            @Suppress("DEPRECATION")
+            txtQuestionBody.text = Html.fromHtml(questionBody)
+        }
     }
 
     fun registerListener(listener: Listener) {
@@ -69,12 +79,6 @@ class QuestionDetailsViewMvc(
 
     fun hideProgressIndication() {
         swipeRefresh.isRefreshing = false
-    }
-
-    fun setQuestionBody(questionBody: String) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-            txtQuestionBody.text = Html.fromHtml(questionBody, Html.FROM_HTML_MODE_LEGACY)
-        }
     }
 
 }

@@ -22,15 +22,16 @@ class QuestionDetailsActivity : AppCompatActivity(), QuestionDetailsViewMvc.List
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
-    private lateinit var viewMvc: QuestionDetailsViewMvc
-
     private lateinit var stackoverflowApi: StackoverflowApi
 
     private lateinit var questionId: String
 
+    private lateinit var viewMvc: QuestionDetailsViewMvc
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         viewMvc = QuestionDetailsViewMvc(LayoutInflater.from(this), null)
+
         setContentView(viewMvc.rootView)
 
         // init retrofit
@@ -63,11 +64,7 @@ class QuestionDetailsActivity : AppCompatActivity(), QuestionDetailsViewMvc.List
                 val response = stackoverflowApi.questionDetails(questionId)
                 if (response.isSuccessful && response.body() != null) {
                     val questionBody = response.body()!!.question.body
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                        viewMvc.setQuestionBody(questionBody)
-                    } else {
-                        viewMvc.setQuestionBody(questionBody)
-                    }
+                    viewMvc.bindQuestionBody(questionBody)
                 } else {
                     onFetchFailed()
                 }
@@ -87,6 +84,7 @@ class QuestionDetailsActivity : AppCompatActivity(), QuestionDetailsViewMvc.List
                 .add(ServerErrorDialogFragment.newInstance(), null)
                 .commitAllowingStateLoss()
     }
+
 
     override fun onListenerBackPressed() {
         onBackPressed()
