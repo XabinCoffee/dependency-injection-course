@@ -8,19 +8,7 @@ import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class FetchQuestionDetailsUseCase {
-
-    private lateinit var stackoverflowApi: StackoverflowApi
-
-    init {
-        // init retrofit
-        val retrofit = Retrofit.Builder()
-            .baseUrl(Constants.BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-        stackoverflowApi = retrofit.create(StackoverflowApi::class.java)
-
-    }
+class FetchQuestionDetailsUseCase(private val stackoverflowApi: StackoverflowApi) {
 
     sealed class Result {
         class Success(val question: QuestionWithBody) : Result()

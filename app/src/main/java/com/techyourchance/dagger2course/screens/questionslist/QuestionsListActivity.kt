@@ -11,10 +11,14 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.techyourchance.dagger2course.Constants
+import com.techyourchance.dagger2course.MyApplication
 import com.techyourchance.dagger2course.R
 import com.techyourchance.dagger2course.networking.StackoverflowApi
 import com.techyourchance.dagger2course.questions.FetchQuestionsUseCase
 import com.techyourchance.dagger2course.questions.Question
+import com.techyourchance.dagger2course.screens.common.ScreensNavigator
+import com.techyourchance.dagger2course.screens.common.activities.BaseActivity
+import com.techyourchance.dagger2course.screens.common.dialogs.DialogsNavigator
 import com.techyourchance.dagger2course.screens.common.dialogs.ServerErrorDialogFragment
 import com.techyourchance.dagger2course.screens.questiondetails.QuestionDetailsActivity
 import kotlinx.coroutines.*
@@ -22,7 +26,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.util.*
 
-class QuestionsListActivity : AppCompatActivity(), QuestionListViewMvc.Listener {
+class QuestionsListActivity : BaseActivity(), QuestionListViewMvc.Listener {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
@@ -32,14 +36,23 @@ class QuestionsListActivity : AppCompatActivity(), QuestionListViewMvc.Listener 
 
     private lateinit var viewMvc: QuestionListViewMvc
 
+    private lateinit var dialogsNavigator : DialogsNavigator
+
+    private lateinit var screensNavigator: ScreensNavigator
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        dialogsNavigator = DialogsNavigator(supportFragmentManager)
+        
+        screensNavigator = compositionRoot.screensNavigator
+
 
         viewMvc = QuestionListViewMvc(LayoutInflater.from(this), null)
 
         setContentView(viewMvc.rootView)
 
-        fetchQuestionsUseCase =  FetchQuestionsUseCase()
+        fetchQuestionsUseCase =  compositionRoot.fetchQuestionsUseCase
     }
 
     override fun onStart() {
@@ -78,9 +91,7 @@ class QuestionsListActivity : AppCompatActivity(), QuestionListViewMvc.Listener 
     }
 
     private fun onFetchFailed() {
-        supportFragmentManager.beginTransaction()
-                .add(ServerErrorDialogFragment.newInstance(), null)
-                .commitAllowingStateLoss()
+        dialogsNavigator.showServerErrorDialog()
     }
 
 
@@ -89,7 +100,7 @@ class QuestionsListActivity : AppCompatActivity(), QuestionListViewMvc.Listener 
     }
 
     override fun onQuestionClicked(clickedQuestion: Question) {
-        QuestionDetailsActivity.start(this, clickedQuestion.id)
+        screensNavigator.toQuestionDetails(clickedQuestion.id)
     }
 
 

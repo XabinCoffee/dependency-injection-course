@@ -10,30 +10,46 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.techyourchance.dagger2course.Constants
+import com.techyourchance.dagger2course.MyApplication
 import com.techyourchance.dagger2course.R
 import com.techyourchance.dagger2course.networking.StackoverflowApi
 import com.techyourchance.dagger2course.questions.FetchQuestionDetailsUseCase
+import com.techyourchance.dagger2course.screens.common.ScreensNavigator
+import com.techyourchance.dagger2course.screens.common.activities.BaseActivity
+import com.techyourchance.dagger2course.screens.common.dialogs.DialogsNavigator
 import com.techyourchance.dagger2course.screens.common.dialogs.ServerErrorDialogFragment
 import com.techyourchance.dagger2course.screens.common.toolbar.MyToolbar
 import kotlinx.coroutines.*
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class QuestionDetailsActivity : AppCompatActivity(), QuestionDetailsViewMvc.Listener {
+class QuestionDetailsActivity : BaseActivity(), QuestionDetailsViewMvc.Listener {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
-    private val fetchDetailsUseCase = FetchQuestionDetailsUseCase()
+    private lateinit var fetchDetailsUseCase: FetchQuestionDetailsUseCase
 
     private lateinit var questionId: String
 
     private lateinit var viewMvc: QuestionDetailsViewMvc
 
+    private lateinit var dialogsNavigator : DialogsNavigator
+
+    private lateinit var screensNavigator: ScreensNavigator
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        dialogsNavigator = DialogsNavigator(supportFragmentManager)
+
+        screensNavigator = compositionRoot.screensNavigator
+
+
         viewMvc = QuestionDetailsViewMvc(LayoutInflater.from(this), null)
 
         setContentView(viewMvc.rootView)
+
+        fetchDetailsUseCase = compositionRoot.fetchQuestionDetailsUseCase
 
 
         // retrieve question ID passed from outside
@@ -72,14 +88,12 @@ class QuestionDetailsActivity : AppCompatActivity(), QuestionDetailsViewMvc.List
     }
 
     private fun onFetchFailed() {
-        supportFragmentManager.beginTransaction()
-                .add(ServerErrorDialogFragment.newInstance(), null)
-                .commitAllowingStateLoss()
+        dialogsNavigator.showServerErrorDialog()
     }
 
 
     override fun onListenerBackPressed() {
-        onBackPressed()
+        screensNavigator.navigateBack()
     }
 
     companion object {
