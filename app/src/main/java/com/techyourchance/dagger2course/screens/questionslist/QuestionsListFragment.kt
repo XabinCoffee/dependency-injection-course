@@ -1,37 +1,41 @@
-package com.techyourchance.dagger2course.screens.questiondetails
+package com.techyourchance.dagger2course.screens.questionslist
 
-import android.content.Context
-import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import android.text.Html
 import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.techyourchance.dagger2course.Constants
 import com.techyourchance.dagger2course.MyApplication
 import com.techyourchance.dagger2course.R
 import com.techyourchance.dagger2course.networking.StackoverflowApi
-import com.techyourchance.dagger2course.questions.FetchQuestionDetailsUseCase
+import com.techyourchance.dagger2course.questions.FetchQuestionsUseCase
+import com.techyourchance.dagger2course.questions.Question
 import com.techyourchance.dagger2course.screens.common.ScreensNavigator
 import com.techyourchance.dagger2course.screens.common.activities.BaseActivity
 import com.techyourchance.dagger2course.screens.common.dialogs.DialogsNavigator
 import com.techyourchance.dagger2course.screens.common.dialogs.ServerErrorDialogFragment
-import com.techyourchance.dagger2course.screens.common.toolbar.MyToolbar
+import com.techyourchance.dagger2course.screens.common.fragments.BaseFragment
+import com.techyourchance.dagger2course.screens.questiondetails.QuestionDetailsActivity
 import kotlinx.coroutines.*
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.*
 
-class QuestionDetailsActivity : BaseActivity(), QuestionDetailsViewMvc.Listener {
+class QuestionsListFragment : BaseFragment(), QuestionListViewMvc.Listener {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
-    private lateinit var fetchDetailsUseCase: FetchQuestionDetailsUseCase
+    private lateinit var fetchQuestionsUseCase: FetchQuestionsUseCase
 
-    private lateinit var questionId: String
+    private var isDataLoaded = false
 
-    private lateinit var viewMvc: QuestionDetailsViewMvc
+    private lateinit var viewMvc: QuestionListViewMvc
 
     private lateinit var dialogsNavigator : DialogsNavigator
 
@@ -41,25 +45,25 @@ class QuestionDetailsActivity : BaseActivity(), QuestionDetailsViewMvc.Listener 
         super.onCreate(savedInstanceState)
 
         dialogsNavigator = compositionRoot.dialogsNavigator
-
         screensNavigator = compositionRoot.screensNavigator
+        fetchQuestionsUseCase = compositionRoot.fetchQuestionsUseCase
+    }
 
-
-        viewMvc = compositionRoot.viewMvcFactory.newQuestionDetailsViewMvc(null)
-
-        setContentView(viewMvc.rootView)
-
-        fetchDetailsUseCase = compositionRoot.fetchQuestionDetailsUseCase
-
-
-        // retrieve question ID passed from outside
-        questionId = intent.extras!!.getString(EXTRA_QUESTION_ID)!!
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        viewMvc = compositionRoot.viewMvcFactory.newQuestionListViewMvc(container)
+        return viewMvc.rootView
     }
 
     override fun onStart() {
         super.onStart()
         viewMvc.registerListener(this)
-        fetchQuestionDetails()
+        if (!isDataLoaded) {
+            fetchQuestions()
+        }
     }
 
     override fun onStop() {
@@ -68,20 +72,22 @@ class QuestionDetailsActivity : BaseActivity(), QuestionDetailsViewMvc.Listener 
         coroutineScope.coroutineContext.cancelChildren()
     }
 
-    private fun fetchQuestionDetails() {
+    private fun fetchQuestions() {
         coroutineScope.launch {
             viewMvc.showProgressIndication()
             try {
-                when (val result = fetchDetailsUseCase.fetchQuestionDetails(questionId)) {
-                    is FetchQuestionDetailsUseCase.Result.Success -> {
-                        viewMvc.bindQuestionBody(result.question.body)
+                when (val result = fetchQuestionsUseCase.fetchLatestQuestions())  {
+                    is FetchQuestionsUseCase.Result.Success ->  {
+                        viewMvc.bindQuestions(result.questions)
+                        isDataLoaded =  true
                     }
-                    is FetchQuestionDetailsUseCase.Result.Failure -> {
+                    is FetchQuestionsUseCase.Result.Failure -> {
                         onFetchFailed()
                     }
                 }
             } finally {
                 viewMvc.hideProgressIndication()
+
             }
 
         }
@@ -92,17 +98,12 @@ class QuestionDetailsActivity : BaseActivity(), QuestionDetailsViewMvc.Listener 
     }
 
 
-    override fun onListenerBackPressed() {
-        screensNavigator.navigateBack()
+    override fun onRefreshClicked() {
+        fetchQuestions()
     }
 
-    companion object {
-        const val EXTRA_QUESTION_ID = "EXTRA_QUESTION_ID"
-        fun start(context: Context, questionId: String) {
-            val intent = Intent(context, QuestionDetailsActivity::class.java)
-            intent.putExtra(EXTRA_QUESTION_ID, questionId)
-            context.startActivity(intent)
-        }
+    override fun onQuestionClicked(clickedQuestion: Question) {
+        screensNavigator.toQuestionDetails(clickedQuestion.id)
     }
 
 
