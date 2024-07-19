@@ -10,7 +10,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class MyApplication: Application() {
 
-    public lateinit var appCompositionRoot: AppCompositionRoot
+    lateinit var appCompositionRoot: AppCompositionRoot
 
     override fun onCreate() {
         appCompositionRoot = AppCompositionRoot()
