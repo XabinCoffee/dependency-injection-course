@@ -12,6 +12,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.techyourchance.dagger2course.Constants
 import com.techyourchance.dagger2course.MyApplication
 import com.techyourchance.dagger2course.R
+import com.techyourchance.dagger2course.common.dependencyinjection.Service
 import com.techyourchance.dagger2course.networking.StackoverflowApi
 import com.techyourchance.dagger2course.questions.FetchQuestionDetailsUseCase
 import com.techyourchance.dagger2course.screens.common.ScreensNavigator
@@ -19,6 +20,7 @@ import com.techyourchance.dagger2course.screens.common.activities.BaseActivity
 import com.techyourchance.dagger2course.screens.common.dialogs.DialogsNavigator
 import com.techyourchance.dagger2course.screens.common.dialogs.ServerErrorDialogFragment
 import com.techyourchance.dagger2course.screens.common.toolbar.MyToolbar
+import com.techyourchance.dagger2course.screens.common.viewsmvc.ViewMvcFactory
 import kotlinx.coroutines.*
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -27,9 +29,10 @@ class QuestionDetailsActivity : BaseActivity(), QuestionDetailsViewMvc.Listener 
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
-    private lateinit var fetchDetailsUseCase: FetchQuestionDetailsUseCase
-    private lateinit var dialogsNavigator : DialogsNavigator
-    private lateinit var screensNavigator: ScreensNavigator
+    @field:Service private lateinit var fetchDetailsUseCase: FetchQuestionDetailsUseCase
+    @field:Service lateinit var dialogsNavigator : DialogsNavigator
+    @field:Service lateinit var screensNavigator: ScreensNavigator
+    @field:Service lateinit var viewMvcFactory: ViewMvcFactory
 
     private lateinit var viewMvc: QuestionDetailsViewMvc
 
@@ -37,13 +40,11 @@ class QuestionDetailsActivity : BaseActivity(), QuestionDetailsViewMvc.Listener 
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        viewMvc = compositionRoot.viewMvcFactory.newQuestionDetailsViewMvc(null)
-        setContentView(viewMvc.rootView)
+        injector.inject(this)
 
-        dialogsNavigator = compositionRoot.dialogsNavigator
-        screensNavigator = compositionRoot.screensNavigator
-        fetchDetailsUseCase = compositionRoot.fetchQuestionDetailsUseCase
+        super.onCreate(savedInstanceState)
+        viewMvc = viewMvcFactory.newQuestionDetailsViewMvc(null)
+        setContentView(viewMvc.rootView)
 
         // retrieve question ID passed from outside
         questionId = intent.extras!!.getString(EXTRA_QUESTION_ID)!!

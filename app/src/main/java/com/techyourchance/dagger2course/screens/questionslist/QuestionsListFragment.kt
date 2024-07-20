@@ -13,6 +13,7 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.techyourchance.dagger2course.Constants
 import com.techyourchance.dagger2course.MyApplication
 import com.techyourchance.dagger2course.R
+import com.techyourchance.dagger2course.common.dependencyinjection.Service
 import com.techyourchance.dagger2course.networking.StackoverflowApi
 import com.techyourchance.dagger2course.questions.FetchQuestionsUseCase
 import com.techyourchance.dagger2course.questions.Question
@@ -21,6 +22,7 @@ import com.techyourchance.dagger2course.screens.common.activities.BaseActivity
 import com.techyourchance.dagger2course.screens.common.dialogs.DialogsNavigator
 import com.techyourchance.dagger2course.screens.common.dialogs.ServerErrorDialogFragment
 import com.techyourchance.dagger2course.screens.common.fragments.BaseFragment
+import com.techyourchance.dagger2course.screens.common.viewsmvc.ViewMvcFactory
 import com.techyourchance.dagger2course.screens.questiondetails.QuestionDetailsActivity
 import kotlinx.coroutines.*
 import retrofit2.Retrofit
@@ -31,19 +33,17 @@ class QuestionsListFragment : BaseFragment(), QuestionListViewMvc.Listener {
 
     private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
-    private lateinit var fetchQuestionsUseCase: FetchQuestionsUseCase
-    private lateinit var dialogsNavigator : DialogsNavigator
-    private lateinit var screensNavigator: ScreensNavigator
+    @field:Service private lateinit var fetchQuestionsUseCase: FetchQuestionsUseCase
+    @field:Service lateinit var dialogsNavigator : DialogsNavigator
+    @field:Service lateinit var screensNavigator: ScreensNavigator
+    @field:Service lateinit var viewMvcFactory: ViewMvcFactory
 
     private lateinit var viewMvc: QuestionListViewMvc
 
     private var isDataLoaded = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        dialogsNavigator = compositionRoot.dialogsNavigator
-        screensNavigator = compositionRoot.screensNavigator
-        fetchQuestionsUseCase = compositionRoot.fetchQuestionsUseCase
+        injector.inject(this)
     }
 
     override fun onCreateView(
@@ -51,7 +51,7 @@ class QuestionsListFragment : BaseFragment(), QuestionListViewMvc.Listener {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        viewMvc = compositionRoot.viewMvcFactory.newQuestionListViewMvc(container)
+        viewMvc = viewMvcFactory.newQuestionListViewMvc(container)
         return viewMvc.rootView
     }
 
