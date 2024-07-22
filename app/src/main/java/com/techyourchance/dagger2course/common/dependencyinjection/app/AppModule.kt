@@ -1,7 +1,6 @@
-package com.techyourchance.dagger2course.common.dependencyinjection
+package com.techyourchance.dagger2course.common.dependencyinjection.app
 
 import android.app.Application
-import androidx.annotation.UiThread
 import com.techyourchance.dagger2course.Constants
 import com.techyourchance.dagger2course.networking.StackoverflowApi
 import dagger.Module

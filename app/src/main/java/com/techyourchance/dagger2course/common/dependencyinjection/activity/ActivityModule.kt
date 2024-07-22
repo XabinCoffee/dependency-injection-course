@@ -1,10 +1,8 @@
-package com.techyourchance.dagger2course.common.dependencyinjection
+package com.techyourchance.dagger2course.common.dependencyinjection.activity
 
 import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity
-import com.techyourchance.dagger2course.networking.StackoverflowApi
-import com.techyourchance.dagger2course.questions.FetchQuestionDetailsUseCase
-import com.techyourchance.dagger2course.questions.FetchQuestionsUseCase
+import com.techyourchance.dagger2course.common.dependencyinjection.app.AppComponent
 import com.techyourchance.dagger2course.screens.common.ScreensNavigator
 import dagger.Module
 import dagger.Provides
@@ -24,10 +22,10 @@ class ActivityModule(
     fun activity() = activity
 
     @Provides
-    fun screensNavigator(activity: AppCompatActivity) = screensNavigator
+    fun application() = appComponent.application()
 
     @Provides
-    fun application() = appComponent.application()
+    fun screensNavigator(activity: AppCompatActivity) = screensNavigator
 
     @Provides
     fun layoutInflater() = LayoutInflater.from(activity)
