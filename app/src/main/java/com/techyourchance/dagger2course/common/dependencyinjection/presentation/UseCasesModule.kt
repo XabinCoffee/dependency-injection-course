@@ -13,12 +13,11 @@ import dagger.Provides
 
 
 @Module
-class PresentationModule {
+class UseCasesModule {
 
     @Provides
-    fun viewMvcFactory(layoutInflater: LayoutInflater) = ViewMvcFactory(layoutInflater)
+    fun fetchQuestionsUseCase(stackoverflowApi: StackoverflowApi) = FetchQuestionsUseCase(stackoverflowApi)
 
     @Provides
-    fun dialogsNavigator(fragmentManager: FragmentManager) = DialogsNavigator(fragmentManager)
-
+    fun fetchQuestionDetailsUseCase(stackoverflowApi: StackoverflowApi) = FetchQuestionDetailsUseCase(stackoverflowApi)
 }
