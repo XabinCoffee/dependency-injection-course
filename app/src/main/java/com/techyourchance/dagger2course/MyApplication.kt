@@ -7,12 +7,13 @@ import com.techyourchance.dagger2course.common.dependencyinjection.app.DaggerApp
 
 class MyApplication: Application() {
 
-    lateinit var appComponent: AppComponent
+    val appComponent: AppComponent by lazy {
+        DaggerAppComponent.builder()
+            .appModule(AppModule(this))
+            .build()
+    }
 
     override fun onCreate() {
-        appComponent = DaggerAppComponent.builder()
-            .appModule(AppModule(this@MyApplication))
-            .build()
         super.onCreate()
     }
 
