@@ -13,7 +13,7 @@ open class BaseActivity: AppCompatActivity() {
     val activityComponent: ActivityComponent by lazy {
         appComponent.newActivityComponentBuilder()
             .activity(this)
-            .activityModule(ActivityModule())
+            .activityModule(ActivityModule)
             .build()
     }
 
