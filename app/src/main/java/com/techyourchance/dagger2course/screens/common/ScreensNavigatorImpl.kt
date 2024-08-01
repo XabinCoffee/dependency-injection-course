@@ -7,9 +7,14 @@ import com.techyourchance.dagger2course.common.dependencyinjection.activity.Acti
 import com.techyourchance.dagger2course.screens.questiondetails.QuestionDetailsActivity
 import javax.inject.Inject
 
-interface ScreensNavigator {
 
-    fun navigateBack()
+class ScreensNavigatorImpl @Inject constructor(private val activity: AppCompatActivity): ScreensNavigator {
 
-    fun toQuestionDetails(questionId: String)
+    override fun navigateBack() {
+        activity.onBackPressed()
+    }
+
+    override fun toQuestionDetails(questionId: String) {
+        QuestionDetailsActivity.start(activity, questionId)
+    }
 }
