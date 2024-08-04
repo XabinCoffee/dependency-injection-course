@@ -89,4 +89,9 @@ class QuestionsListFragment : BaseFragment(), QuestionListViewMvc.Listener {
     }
 
 
+    override fun onViewModelClicked() {
+        screensNavigator.toViewModel()
+    }
+
+
 }

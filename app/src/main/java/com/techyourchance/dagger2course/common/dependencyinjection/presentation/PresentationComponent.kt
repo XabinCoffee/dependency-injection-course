@@ -4,6 +4,7 @@ import com.techyourchance.dagger2course.common.dependencyinjection.activity.Acti
 import com.techyourchance.dagger2course.screens.questiondetails.QuestionDetailsActivity
 import com.techyourchance.dagger2course.screens.questionslist.QuestionsListActivity
 import com.techyourchance.dagger2course.screens.questionslist.QuestionsListFragment
+import com.techyourchance.dagger2course.screens.viewmodel.ViewModelActivity
 import dagger.Component
 import dagger.Subcomponent
 
@@ -13,4 +14,5 @@ import dagger.Subcomponent
 interface PresentationComponent {
     fun inject(fragment: QuestionsListFragment)
     fun inject(activity: QuestionDetailsActivity)
+    fun inject(viewModelActivity: ViewModelActivity)
 }
